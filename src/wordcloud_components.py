@@ -2,7 +2,7 @@ from wordcloud import WordCloud
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 import plotly.graph_objs as go
-from nlp import get_top_keywords
+from src.nlp import get_top_keywords
 
 
 def plotly_wordcloud(data_frame):
