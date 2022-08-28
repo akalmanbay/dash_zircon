@@ -1,7 +1,7 @@
 from dash import Dash, dcc, html
 from dash.dependencies import Input, Output, State
 
-# from asinparser import AsinParser
+from asinparser import AsinParser
 import pandas as pd
 import dash_bootstrap_components as dbc
 
@@ -35,13 +35,17 @@ NAVBAR = dbc.Navbar(
 )
 
 BODY = dbc.Container(
-    [dbc.Card(WORDCLOUD_DASH_PLOTS)],
-    className="mt-12",
+    [dbc.Card(dbc.Row(WORDCLOUD_DASH_PLOTS, style={"marginTop": 30}))],
 )
 
 app.layout = html.Div(
     [
-        html.Div(["Import ASIN or ASINS: ", dcc.Input(type="text", id="asin-input")]),
+        html.Div(
+            [
+                "Import ASIN or ASINS: for example B09S6FWS7W or B09KC8JXLM",
+                dcc.Input(type="text", id="asin-input", value="B09S6FWS7W"),
+            ]
+        ),
         html.Button("Submit", id="submit-button"),
         html.Div(id="print-reviews-output"),
         html.Div(children=[BODY]),
@@ -51,7 +55,6 @@ app.layout = html.Div(
 
 @app.callback(
     [
-        Output("bank-wordcloud", "figure"),
         Output("frequency_figure", "figure"),
         Output("bank-treemap", "figure"),
         Output("no-data-alert", "style"),
@@ -60,35 +63,34 @@ app.layout = html.Div(
     State("asin-input", "value"),
 )
 def print_reviews(n_clicks, asin):
-
+    alert_style = {"display": "none"}
     if n_clicks == 0:
-        return None
-    # if asin is None:
-    #     return None
-    asin = "B09S6FWS7W"
+        return None, None, alert_style
+
     global df
     df_asin = df[df["asin"] == asin]
-    # if df_asin.empty:
-    #     df_asin = parse_reviews(asin)
+    if df_asin.empty:
+        df_asin = parse_reviews(asin)
 
     local_df = df_asin["review"]
-    wordcloud, frequency_figure, treemap = plotly_wordcloud(local_df)
-    alert_style = {"display": "none"}
-    if (wordcloud == {}) or (frequency_figure == {}) or (treemap == {}):
+    frequency_figure, treemap = plotly_wordcloud(local_df)
+
+    if (frequency_figure == {}) or (treemap == {}):
         alert_style = {"display": "block"}
     print("redrawing bank-wordcloud...done")
-    return (wordcloud, frequency_figure, treemap, alert_style)
+    return frequency_figure, treemap, alert_style
 
 
-# def parse_reviews(asin):
-#     global df
-#     asin_parser = AsinParser()
-#     df_asin = pd.DataFrame(asin_parser.get_reviews(asin))
-#     df_asin['asin'] = asin
-#     df = pd.concat([df, df_asin])
-#     # save df to db
-#     # df.to_csv('aws_reviews_sample.csv')
-#     return df_asin
+def parse_reviews(asin):
+    global df
+    asin_parser = AsinParser()
+    df_asin = pd.DataFrame(asin_parser.get_reviews(asin))
+    df_asin["asin"] = asin
+    df = pd.concat([df, df_asin])
+    # save df to db
+    df.to_csv("aws_reviews_sample.csv")
+    return df_asin
+
 
 if __name__ == "__main__":
     app.run_server(debug=True, use_reloader=True)
