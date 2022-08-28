@@ -2,21 +2,19 @@ from wordcloud import WordCloud
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 import plotly.graph_objs as go
-from src.nlp import get_top_keywords
+from src.nlp import Extractor
 
 
 def plotly_wordcloud(data_frame):
     """A wonderful function that returns figure data for three equally
     wonderful plots: wordcloud, frequency histogram and treemap"""
     complaints_text = list(data_frame.dropna().values)
+    extractor = Extractor()
 
     if len(complaints_text) < 1:
         return {}, {}, {}
 
-    # join all documents in corpus
-    text = " ".join(list(complaints_text))
-
-    word_frequency = get_top_keywords(data_frame)
+    word_frequency = extractor.get_top_keywords(data_frame)
     word_cloud = WordCloud(max_words=100, max_font_size=90)
     word_cloud.generate_from_frequencies(word_frequency)
 
