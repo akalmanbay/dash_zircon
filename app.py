@@ -7,9 +7,9 @@ import dash_bootstrap_components as dbc
 
 from src.wordcloud_components import plotly_wordcloud, WORDCLOUD_DASH_PLOTS
 
-# get df from db
 df = pd.read_csv("data/aws_reviews_sample.csv")
 app = Dash(__name__)
+server = app.server
 
 PLOTLY_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
 NAVBAR = dbc.Navbar(
@@ -19,9 +19,7 @@ NAVBAR = dbc.Navbar(
             dbc.Row(
                 [
                     dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
-                    dbc.Col(
-                        dbc.NavbarBrand("Bank Customer Complaints", className="ml-2")
-                    ),
+                    dbc.Col(dbc.NavbarBrand("Bank Customer Complaints", className="ml-2")),
                 ],
                 align="center",
                 # no_gutters=True,
@@ -91,4 +89,4 @@ def print_reviews(n_clicks, asin):
 #     return df_asin
 
 if __name__ == "__main__":
-    app.run_server(debug=True, use_reloader=True)
+    app.run(debug=True, use_reloader=True)

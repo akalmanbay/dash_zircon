@@ -1,6 +1,7 @@
 from typing import Dict, List, Tuple
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
+import nltk
 from nltk.corpus import stopwords as nltk_stopwords
 import treetaggerwrapper as tt
 import string
@@ -15,23 +16,27 @@ def sort_coo(coo_matrix):
 
 class Extractor:
     def __init__(
-        self, top_k_keywords: int = 10, top_n: int = 30, stopwords: List[str] = None
+        self,
+        top_k_keywords: int = 10,
+        top_n: int = 30,
+        stopwords: List[str] = None,
+        download_nltk=False,
     ):
         self.top_k_keywords = top_k_keywords
         self.top_n = top_n
+
+        nltk.download("stopwords")
         self.stopwords = list(nltk_stopwords.words("english"))
         if stopwords is not None:
             self.stopwords += stopwords
 
-        path = "TreeTagger/tree-tagger-MacOSX-3.2.3"
+        path = "tree_tagger_lib"
         self.t_tagger = tt.TreeTagger(TAGLANG="en", TAGDIR=path)
 
     def _preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.apply(lambda x: str(x).lower())
         df = df.reset_index(drop=True)
-        df = df.str.translate(
-            str.maketrans("", "", string.punctuation.replace(".", ""))
-        )
+        df = df.str.translate(str.maketrans("", "", string.punctuation.replace(".", "")))
         df = df.str.replace("\d+", "")
 
         # lemmatization
@@ -40,9 +45,7 @@ class Extractor:
         df = df.apply(lambda x: " ".join(x))
         return df.to_list()
 
-    def _extract_topn_from_vector(
-        self, feature_names: List[str], sorted_items: Tuple[int, float]
-    ) -> Dict[str, float]:
+    def _extract_topn_from_vector(self, feature_names: List[str], sorted_items: Tuple[int, float]) -> Dict[str, float]:
         """get the feature names and tf-idf score of top n items"""
 
         # use only topn items from vector
@@ -78,9 +81,7 @@ class Extractor:
 
     def get_top_keywords(self, df: pd.DataFrame, STOPWORDS=list()):
         corpora = self._preprocess(df)
-        vectorizer = TfidfVectorizer(
-            stop_words=self.stopwords, smooth_idf=True, use_idf=True
-        )
+        vectorizer = TfidfVectorizer(stop_words=self.stopwords, smooth_idf=True, use_idf=True)
         vectorizer.fit(corpora)
         feature_names = vectorizer.get_feature_names_out()
 
@@ -101,9 +102,5 @@ class Extractor:
             for i, word in enumerate(words):
                 word_frequency[word] += 1 / (1 + i)
 
-        word_frequency = dict(
-            sorted(word_frequency.items(), key=lambda item: item[1], reverse=True)[
-                : self.top_n
-            ]
-        )
+        word_frequency = dict(sorted(word_frequency.items(), key=lambda item: item[1], reverse=True)[: self.top_n])
         return word_frequency
