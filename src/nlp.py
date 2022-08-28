@@ -25,7 +25,6 @@ class Extractor:
 
         path = "TreeTagger/tree-tagger-MacOSX-3.2.3"
         self.t_tagger = tt.TreeTagger(TAGLANG="en", TAGDIR=path)
-        # self.a = number
 
     def _preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.apply(lambda x: str(x).lower())
