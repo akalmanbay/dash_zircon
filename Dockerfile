@@ -9,6 +9,6 @@ RUN pip3 install -r  \
 
 COPY . .
 
-USER root
+RUN chmod -R 777 /tree_tagger_lib
 
 CMD ["gunicorn", "app:server"]
