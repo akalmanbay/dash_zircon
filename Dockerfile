@@ -9,4 +9,4 @@ RUN pip3 install -r  \
 
 COPY . .
 
-CMD ["gunicorn", "-b", "0.0.0.0:80", "app:server"]
+CMD ["gunicorn", "app:server"]
