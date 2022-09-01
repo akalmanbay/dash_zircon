@@ -9,4 +9,6 @@ RUN pip3 install -r  \
 
 COPY . .
 
+USER root
+
 CMD ["gunicorn", "app:server"]
