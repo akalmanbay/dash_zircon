@@ -1,6 +1,6 @@
 NAME?=dashboard
-# COMMAND?=python app.py
-COMMAND?=
+COMMAND?=python app.py
+PORT?=8080
 OPTIONS?=
 
 .PHONY: all
@@ -19,8 +19,7 @@ stop:
 run:
 	docker run --rm -dit \
 		$(OPTIONS) \
-		--net=host \
-		--ipc=host \
+		-p $(PORT):$(PORT) \
 		-v $(shell pwd):/workdir \
 		--name=$(NAME) \
 		$(NAME) \

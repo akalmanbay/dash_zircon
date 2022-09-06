@@ -10,6 +10,6 @@ RUN pip3 install -r  \
 COPY . /workdir
 WORKDIR /workdir
 
-RUN chmod -R 777 /tree_tagger_lib
+RUN chmod -R 777 tree_tagger_lib
 
-CMD ["gunicorn", "-b", "0.0.0.0:80" "app:server"]
+CMD ["gunicorn", "app:server"]
