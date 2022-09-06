@@ -7,8 +7,9 @@ RUN pip3 install -r  \
     --no-cache-dir \
     --ignore-installed
 
-COPY . .
+COPY . /workdir
+WORKDIR /workdir
 
 RUN chmod -R 777 /tree_tagger_lib
 
-CMD ["gunicorn", "app:server"]
+CMD ["gunicorn", "-b", "0.0.0.0:80" "app:server"]
